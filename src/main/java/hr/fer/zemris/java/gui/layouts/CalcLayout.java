@@ -122,10 +122,10 @@ public class CalcLayout implements LayoutManager2 {
 	public void layoutContainer(Container parent) {
 		
 		Dimension d = getComponentDimension();
-		double ratioX = (double) parent.getWidth() / preferredLayoutSize(parent).getWidth();
-		double ratioY = (double) parent.getHeight() / preferredLayoutSize(parent).getHeight();
+		double ratioHorizontal = (double) parent.getWidth() / preferredLayoutSize(parent).getWidth();
+		double ratioVertical = (double) parent.getHeight() / preferredLayoutSize(parent).getHeight();
 
-		d.setSize(ratioX * d.getWidth(),  ratioY * d.getHeight());
+		d.setSize(ratioHorizontal * d.getWidth(),  ratioVertical * d.getHeight());
 
 		
 		components.entrySet()
