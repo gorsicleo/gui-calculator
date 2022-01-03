@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import hr.fer.zemris.java.gui.calc.impl.CalcModelImpl;
 import hr.fer.zemris.java.gui.calc.model.CalcModel;
 import hr.fer.zemris.java.gui.calc.model.CalcValueListener;
 import hr.fer.zemris.java.gui.calc.model.CalculatorInputException;
@@ -17,7 +18,7 @@ public class CalcModelTest {
 	
 	private static CalcModel newCalcModel() {
 		// Zamijenite ovo tako da vraća primjerak Vaše implementacije modela.
-		return new DummyCalcModel();
+		return new CalcModelImpl();
 	}
 
 	@BeforeEach
