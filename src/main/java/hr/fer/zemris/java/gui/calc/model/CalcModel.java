@@ -144,4 +144,9 @@ public interface CalcModel {
 	 */
 	void setPendingBinaryOperation(DoubleBinaryOperator op);
 	
+	void freezeValue(String value);
+	
+	boolean hasFrozenValue();
+
+	
 }

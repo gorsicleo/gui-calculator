@@ -1,5 +1,8 @@
 package hr.fer.zemris.java.gui.calc.impl;
 
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.DoubleBinaryOperator;
 
 import javax.swing.JLabel;
@@ -20,7 +23,6 @@ public class CalcModelImpl implements CalcModel {
 
 	private static final String NOT_EDIATBLE_ERROR = "Calculator is not in editable state!";
 
-	// private JLabel display;
 
 	private boolean isEditable;
 
@@ -37,6 +39,12 @@ public class CalcModelImpl implements CalcModel {
 	private boolean isActiveOperandSet;
 
 	private DoubleBinaryOperator pendingOperation;
+	
+	private List<CalcValueListener> listeners;
+	
+	private String frozenValue;
+	
+	private boolean hasFrozenValue;
 
 	public CalcModelImpl() {
 		isEditable = true;
@@ -47,18 +55,19 @@ public class CalcModelImpl implements CalcModel {
 		activeOperand = 0.0;
 		pendingOperation = null;
 		isActiveOperandSet = false;
+		listeners = new LinkedList<CalcValueListener>();
+		hasFrozenValue = false;
+		frozenValue = null;
 	}
 
 	@Override
 	public void addCalcValueListener(CalcValueListener l) {
-		// TODO Auto-generated method stub
-
+		listeners.add(l);
 	}
 
 	@Override
 	public void removeCalcValueListener(CalcValueListener l) {
-		// TODO Auto-generated method stub
-
+		listeners.remove(l);
 	}
 
 	@Override
@@ -73,6 +82,8 @@ public class CalcModelImpl implements CalcModel {
 		numericInput = value;
 		isNegative = value < 0 ? true : false;
 		isEditable = false;
+		
+		wakeListeners();
 	}
 
 	@Override
@@ -86,6 +97,7 @@ public class CalcModelImpl implements CalcModel {
 		input = "";
 		numericInput = 0.0;
 		display = null;
+		wakeListeners();
 
 	}
 
@@ -99,6 +111,7 @@ public class CalcModelImpl implements CalcModel {
 		activeOperand = 0.0;
 		pendingOperation = null;
 		isActiveOperandSet = false;
+		wakeListeners();
 	}
 
 	@Override
@@ -107,6 +120,7 @@ public class CalcModelImpl implements CalcModel {
 		display = input = Double.toString(numericInput);
 
 		display = (display.endsWith(".0")) ? display.substring(0, display.length() - 2) : display;
+		wakeListeners();
 	}
 
 	@Override
@@ -125,7 +139,12 @@ public class CalcModelImpl implements CalcModel {
 		} catch (NumberFormatException e) {
 			throw new CalculatorInputException(NOT_PARSABLE_ERROR);
 		}
-
+		
+		wakeListeners();
+	}
+	
+	public String getDisplay() {
+		return display;
 	}
 
 	@Override
@@ -139,6 +158,7 @@ public class CalcModelImpl implements CalcModel {
 		trimLeadingZeroes();
 		display = input;
 
+		wakeListeners();
 	}
 
 	private void parseNewDigit(int digit) {
@@ -157,6 +177,10 @@ public class CalcModelImpl implements CalcModel {
 		input = input.startsWith("0") ? input.substring(1) : input;
 		input = input.startsWith(".") ? "0" + input : input;
 		input = (input.isEmpty() ? "0" : "") + input;
+	}
+	
+	private void wakeListeners() {
+		listeners.forEach( l -> l.valueChanged(this));
 	}
 
 	@Override
@@ -201,6 +225,19 @@ public class CalcModelImpl implements CalcModel {
 		} else {
 			return (isNegative == true) ? "-0" : "0";
 		}
+	}
+
+	@Override
+	public void freezeValue(String value) {
+		frozenValue = value;
+		hasFrozenValue = true;
+		
+		
+	}
+
+	@Override
+	public boolean hasFrozenValue() {
+		return hasFrozenValue;
 	}
 
 }

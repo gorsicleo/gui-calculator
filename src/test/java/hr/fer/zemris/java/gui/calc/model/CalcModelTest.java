@@ -386,5 +386,17 @@ public class CalcModelTest {
 		private void notimp() {
 			throw new UnsupportedOperationException("Method is not implemented yet!");
 		}
+
+		@Override
+		public void freezeValue(String value) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public boolean hasFrozenValue() {
+			// TODO Auto-generated method stub
+			return false;
+		}
 	}
 }
