@@ -2,8 +2,10 @@ package hr.fer.zemris.java.gui.calc;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.function.BinaryOperator;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleUnaryOperator;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -14,7 +16,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import hr.fer.zemris.java.gui.calc.impl.BinaryOperators;
 import hr.fer.zemris.java.gui.calc.impl.CalcModelImpl;
+import hr.fer.zemris.java.gui.calc.impl.UnaryOperators;
 import hr.fer.zemris.java.gui.layouts.CalcLayout;
 import hr.fer.zemris.java.gui.layouts.RCPosition;
 
@@ -37,6 +41,37 @@ public class Calculator extends JFrame{
 		updateDisplay();
 	}
 	
+	private void decimalPressed() {
+		engine.insertDecimalPoint();
+		updateDisplay();
+	}
+	
+	private void clearPressed() {
+		engine.clear();
+		updateDisplay();
+	}
+	
+	private void binaryOperatorPressed(DoubleBinaryOperator operator) {
+		engine.setActiveOperand(engine.getValue());
+		engine.setPendingBinaryOperation(operator);
+		engine.clear();
+		updateDisplay();
+	}
+	
+	private void unaryOperatorPressed(DoubleUnaryOperator operator) {
+		operator.applyAsDouble(engine.getValue());
+		updateDisplay();
+		engine.clear();
+	}
+	
+	private void equalsPressed() {
+		double operand1 = engine.getActiveOperand();
+		double operand2 = engine.getValue();
+		double result = engine.getPendingBinaryOperation().applyAsDouble(operand1, operand2);
+		engine.setValue(result);
+		updateDisplay();
+	}
+	
 
 
 	private static final Color FACEBOOK_BLUE_COLOR = new Color(59, 89, 182);
@@ -44,7 +79,7 @@ public class Calculator extends JFrame{
 	private static final Color DARK_GRAY_COLOR = Color.DARK_GRAY;
 	
 	private final ActionListener numberPressedListener = (e) -> numberPressed(((JButton) e.getSource()).getText());
-	private final ActionListener invertPressedListener = (e) -> invertPressed();
+
 	private CalcModelImpl engine;
 	
 	private JLabel display;
@@ -56,6 +91,8 @@ public class Calculator extends JFrame{
 		initGUI();
 	}
 
+
+	
 
 	private void initGUI() {
 		JPanel panel = new JPanel(new CalcLayout(5));
@@ -82,9 +119,9 @@ public class Calculator extends JFrame{
 
 
 	private void addFunctionButtons(JPanel panel) {
-		JButton clr = createMaterialButton("clr", DARK_GRAY_COLOR);
-		//clr.addActionListener(new ClrResAction());
-		panel.add(clr, new RCPosition(1, 7));
+		JButton clear = createMaterialButton("clr", DARK_GRAY_COLOR);
+		clear.addActionListener((e) -> clearPressed());
+		panel.add(clear, new RCPosition(1, 7));
 
 		JButton res = createMaterialButton("res", DARK_GRAY_COLOR);
 		//res.addActionListener(new ClrResAction());
@@ -106,67 +143,71 @@ public class Calculator extends JFrame{
 
 
 	private void addOperatorButtons(JPanel panel) {
-		JButton dot = createMaterialButton(".",GRAY_COLOR);
-		//dot.addActionListener(new DotSignAction());
-		panel.add(dot, new RCPosition(5, 5));
+		JButton decimal = createMaterialButton(".",GRAY_COLOR);
+		decimal.addActionListener((e) -> decimalPressed());
+		panel.add(decimal, new RCPosition(5, 5));
 
-		JButton changeSign = createMaterialButton("+/-", GRAY_COLOR);
-		changeSign.addActionListener(invertPressedListener);
-		panel.add(changeSign, new RCPosition(5, 4));
+		JButton swapSign = createMaterialButton("+/-", GRAY_COLOR);
+		swapSign.addActionListener((e) -> invertPressed());
+		panel.add(swapSign, new RCPosition(5, 4));
 
 		JButton inverse = createMaterialButton("1/x",GRAY_COLOR);
-		//inverse.addActionListener(new UnaryOperatorAction(new OperatorInverse(), new OperatorInverse()));
+		inverse.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.RECIPROCAL));
 		panel.add(inverse, new RCPosition(2, 1));
 
 		JButton log = createMaterialButton("log",GRAY_COLOR);
-		//log.addActionListener(new UnaryOperatorAction(new OperatorLog(), new OperatorPow10()));
+		log.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.DEC_LOG));
 		panel.add(log, new RCPosition(3, 1));
 
 		JButton ln = createMaterialButton("ln",GRAY_COLOR);
-		//ln.addActionListener(new UnaryOperatorAction(new OperatorLn(), new OperatorExp()));
+		ln.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.LN));
 		panel.add(ln, new RCPosition(4, 1));
 
 		JButton sin = createMaterialButton("sin",GRAY_COLOR);
-		//sin.addActionListener(new UnaryOperatorAction(new OperatorSin(), new OperatorASin()));
+		sin.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.SIN));
 		panel.add(sin, new RCPosition(2, 2));
 
 		JButton cos = createMaterialButton("cos",GRAY_COLOR);
-		//cos.addActionListener(new UnaryOperatorAction(new OperatorCos(), new OperatorACos()));
+		cos.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.COS));
 		panel.add(cos, new RCPosition(3, 2));
 
 		JButton tan = createMaterialButton("tan",GRAY_COLOR);
-		//tan.addActionListener(new UnaryOperatorAction(new OperatorATan(), new OperatorATan()));
+		tan.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.TAN));
 		panel.add(tan, new RCPosition(4, 2));
 
 		JButton ctg = createMaterialButton("ctg",GRAY_COLOR);
-		//ctg.addActionListener(new UnaryOperatorAction(new OperatorCtg(), new OperatorACtg()));
+		ctg.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.COT));
 		panel.add(ctg, new RCPosition(5, 2));
+		
 		JButton multiply = createMaterialButton("*",GRAY_COLOR);
-		//mul.addActionListener(new BinaryOperatorAction(new OperatorMul()));
+		multiply.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.MUL));
 		panel.add(multiply, new RCPosition(3, 6));
 
 		JButton divide = createMaterialButton("/",GRAY_COLOR);
-		//div.addActionListener(new BinaryOperatorAction(new OperatorDiv()));
+		divide.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.DIV));
 		panel.add(divide, new RCPosition(2, 6));
 
 		JButton add = createMaterialButton("+",GRAY_COLOR);
-		//add.addActionListener(new BinaryOperatorAction(new OperatorAdd()));
+		add.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.SUM));
 		panel.add(add, new RCPosition(5, 6));
 
 		JButton sub = createMaterialButton("-",GRAY_COLOR);
-		//sub.addActionListener(new BinaryOperatorAction(new OperatorSub()));
+		sub.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.SUB));
 		panel.add(sub, new RCPosition(4, 6));
 
 		JButton equal = createMaterialButton("=",GRAY_COLOR);
-		//eq.addActionListener(new BinaryOperatorAction(null));
+		equal.addActionListener((e) -> equalsPressed());
 		panel.add(equal, new RCPosition(1, 6));
 
 		JButton power = createMaterialButton("x^n",GRAY_COLOR);
-		//xn.addActionListener(new BinaryOperatorAction(new OperatorNthPow(), new OperatorNthRoot()));
+		power.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.POW));
 		panel.add(power, new RCPosition(5, 1));
 		
 	}
 
+
+
+	
 
 	private void addDisplay(JPanel panel) {
 		display = new JLabel(engine.getDisplay());
@@ -186,11 +227,6 @@ public class Calculator extends JFrame{
         bt.setForeground(Color.WHITE);
         bt.setFocusPainted(false);
         bt.setFont(new Font("Tahoma", Font.BOLD, 12));
-		
-//		bt.setBackground(Color.decode("#d7efff"));
-//		bt.setBorderPainted(false);
-//		bt.setFocusPainted(false);
-//		bt.setContentAreaFilled(true);
 		
 		return bt;
 	}

@@ -79,11 +79,16 @@ public class CalcModelImpl implements CalcModel {
 	public void setValue(double value) {
 		// method toString already supports infinity and NaN
 		display = Double.toString(Math.abs(value));
+		checkForWholeNumber();
 		numericInput = value;
 		isNegative = value < 0 ? true : false;
 		isEditable = false;
 		
 		wakeListeners();
+	}
+
+	private void checkForWholeNumber() {
+		display = (display.endsWith(".0")) ? display.substring(0, display.length() - 2) : display;
 	}
 
 	@Override
@@ -97,6 +102,7 @@ public class CalcModelImpl implements CalcModel {
 		input = "";
 		numericInput = 0.0;
 		display = null;
+		isEditable = true;
 		wakeListeners();
 
 	}
@@ -119,7 +125,7 @@ public class CalcModelImpl implements CalcModel {
 		numericInput = -numericInput;
 		display = input = Double.toString(numericInput);
 
-		display = (display.endsWith(".0")) ? display.substring(0, display.length() - 2) : display;
+		checkForWholeNumber();
 		wakeListeners();
 	}
 
