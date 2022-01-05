@@ -14,7 +14,7 @@ public class BinaryOperators {
 	
 	public static final DoubleBinaryOperator POW = (b,e) -> Math.pow(b, e);
 	
-	public static final DoubleBinaryOperator RECIPROCAL_POW = (b,e) -> Math.pow(b, 1.0/e);
+	public static final DoubleBinaryOperator ROOT = (b,e) -> Math.pow(b, 1.0/e);
 	
 	
 }
