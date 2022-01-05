@@ -2,8 +2,9 @@ package hr.fer.zemris.java.gui.charts;
 
 public class XYValue {
 	
-	private int x;
-	private int y;
+	private final int x;
+	
+	private final int y;
 	
 	
 	public XYValue(int x, int y) {
@@ -11,10 +12,10 @@ public class XYValue {
 		this.y = y;
 	}
 	
-	
 	public int getX() {
 		return x;
 	}
+	
 	public int getY() {
 		return y;
 	}
