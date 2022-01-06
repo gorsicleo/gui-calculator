@@ -8,6 +8,10 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+/**Class for demonstration of {@link CalcLayout}
+ * @author gorsicleo
+ *
+ */
 @SuppressWarnings("serial")
 public class DemoFrame1 extends JFrame {
 	public DemoFrame1() {

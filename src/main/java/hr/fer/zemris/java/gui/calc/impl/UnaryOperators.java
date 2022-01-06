@@ -2,6 +2,10 @@ package hr.fer.zemris.java.gui.calc.impl;
 
 import java.util.function.DoubleUnaryOperator;
 
+/**Class contains unary operations for simple calculator.
+ * @author gorsicleo
+ *
+ */
 public class UnaryOperators {
 
 	public static final DoubleUnaryOperator DEC_LOG = Math::log10;

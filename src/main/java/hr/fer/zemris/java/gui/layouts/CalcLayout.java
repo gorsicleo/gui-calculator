@@ -9,20 +9,35 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Class representing custom layout for calculator.
+ * 
+ * @author gorsicleo
+ *
+ */
 public class CalcLayout implements LayoutManager2 {
 
 	private static final String FULL_LAYOUT_MESSAGE = "Maximum number of components reached";
+	
 	private static final String NULL_ARGUMENT_ERROR = "Please provide not-null argumenets";
+	
 	private static final String NOT_IMPLEMENTED_MESSAGE = "Not implemented";
+	
 	private static final String ILLEGAL_CONSTRAINT_TYPE = "Not legal type of constraint, please use only RCPosition.";
+	
 	private static final String CONSTRAINT_ALREADY_EXISTS_MESSAGE = "Contraint already exists";
+	
 	private static final String RESERVED_POSITION_MESSAGE = "That position is reserved.";
+	
 	private static final String ILLEGAL_COLUMN_MESSAGE = "Illegal column constraint";
+	
 	private static final String ILLEGAL_ROW_MESSAGE = "Illegal row constraint";
+	
 	private static final int ROWS = 5;
 	private static final int COLUMNS = 7;
 	private static final int MAX_NUMBER_OF_COMPONENTS = 31;
 	private static final RCPosition FIRST_COMPONENT = new RCPosition(1, 1);
+
 	private int space;
 
 	private Set<RCPosition> allConstraints;
@@ -46,6 +61,12 @@ public class CalcLayout implements LayoutManager2 {
 		components = new HashMap<>();
 	}
 
+	/**
+	 * Throws exception if constraint violates rules (row or column out of range)
+	 * 
+	 * @param constraint to be checked
+	 * @throws CalcLayoutException
+	 */
 	private void checkConstraintValidity(RCPosition constraint) {
 		int row = constraint.getRow();
 		int col = constraint.getColumn();
@@ -75,75 +96,100 @@ public class CalcLayout implements LayoutManager2 {
 	}
 
 	public Dimension preferredLayoutSize(Container parent) {
-		int height = components.entrySet().stream()
+		int height = components
+				.entrySet()
+				.stream()
 				.mapToInt((entry) -> entry.getKey().getPreferredSize().height)
-				.max().getAsInt();
-		int width = components.entrySet().stream()
-				.filter( entry -> !entry.getValue().equals(FIRST_COMPONENT))
+				.max()
+				.getAsInt();
+		int width = components
+				.entrySet()
+				.stream()
+				.filter(entry -> !entry.getValue().equals(FIRST_COMPONENT))
 				.mapToInt((entry) -> entry.getKey().getPreferredSize().width)
-				.max().getAsInt();
-		
-		
+				.max()
+				.getAsInt();
+
 		return createDimensionFromValues(parent, height, width);
 	}
-	
-	
-	
 
 	public Dimension minimumLayoutSize(Container parent) {
-		int height = components.entrySet().stream().mapToInt((entry) -> entry.getKey().getMinimumSize().height)
-				.max().getAsInt();
-		int width = components.entrySet().stream()
-				.filter( entry -> !entry.getValue().equals(FIRST_COMPONENT))
+		int height = components
+				.entrySet()
+				.stream()
+				.mapToInt((entry) -> entry.getKey().getMinimumSize().height)
+				.max()
+				.getAsInt();
+		int width = components
+				.entrySet()
+				.stream()
+				.filter(entry -> !entry.getValue().equals(FIRST_COMPONENT))
 				.mapToInt((entry) -> entry.getKey().getMinimumSize().width)
-				.max().getAsInt();
-		
-		
+				.max()
+				.getAsInt();
+
 		return createDimensionFromValues(parent, height, width);
 	}
 
-	
+	/**
+	 * Creates {@link Dimension}.
+	 * 
+	 * 
+	 * @param parent
+	 * @param height
+	 * @param width
+	 * @return (columns * elementWidth + (columns-1)*space)x(rows*elementHeight +
+	 *         (rows - 1)*space)
+	 */
 	private Dimension createDimensionFromValues(Container parent, int height, int width) {
 		return new Dimension(
 				parent.getInsets().left + parent.getInsets().right + COLUMNS * width + (COLUMNS - 1) * space,
-				parent.getInsets().top + parent.getInsets().bottom + ROWS * height + (ROWS - 1) * space
-		);
+				parent.getInsets().top + parent.getInsets().bottom + ROWS * height + (ROWS - 1) * space);
 	}
 
+	/**Method checks every components constraints 
+	 * and gets maximum required dimensions.
+	 * 
+	 * @return {@link Dimension} with width and height 
+	 * equal to biggest width and height of individual component.
+	 */
 	private Dimension getComponentDimension() {
-		int height = components.entrySet().stream().mapToInt((entry) -> entry.getKey().getPreferredSize().height)
-				.max().getAsInt();
-		int width = components.entrySet().stream().mapToInt((entry) -> entry.getKey().getPreferredSize().width)
-				.max().getAsInt();
-		
+		int height = components
+				.entrySet()
+				.stream()
+				.mapToInt((entry) -> entry.getKey().getPreferredSize().height)
+				.max()
+				.getAsInt();
+		int width = components
+				.entrySet()
+				.stream()
+				.mapToInt((entry) -> entry.getKey().getPreferredSize().width)
+				.max()
+				.getAsInt();
+
 		return new Dimension(width, height);
 	}
-	
+
 	public void layoutContainer(Container parent) {
-		
+
 		Dimension d = getComponentDimension();
-		double ratioHorizontal = (double) parent.getWidth() / preferredLayoutSize(parent).getWidth();
-		double ratioVertical = (double) parent.getHeight() / preferredLayoutSize(parent).getHeight();
+		double horizontalRatio = parent.getWidth() / preferredLayoutSize(parent).getWidth();
+		double verticalRatio = parent.getHeight() / preferredLayoutSize(parent).getHeight();
 
-		d.setSize(ratioHorizontal * d.getWidth(),  ratioVertical * d.getHeight());
+		d.setSize(horizontalRatio * d.getWidth(), verticalRatio * d.getHeight());
 
-		
-		components.entrySet()
+		components
+		.entrySet()
 		.stream()
-		.forEach(entry-> {
+		.forEach(entry -> {
 			if (entry.getValue().equals(FIRST_COMPONENT)) {
 				entry.getKey().setBounds(0, 0, 5 * d.width + 4 * space, d.height);
 				return;
 			}
 			entry.getKey().setBounds(
 					(entry.getValue().getColumn() - 1) * (d.width + space),
-					(entry.getValue().getRow() - 1) * (d.height + space),
-					d.width,
-					d.height
-			);
-		});
-		
-
+					(entry.getValue().getRow() - 1) * (d.height + space), d.width, d.height);
+			});
 	}
 
 	public void addLayoutComponent(Component comp, Object constraints) {
@@ -173,15 +219,20 @@ public class CalcLayout implements LayoutManager2 {
 	}
 
 	public Dimension maximumLayoutSize(Container target) {
-		int height = components.entrySet().stream()
+		int height = components
+				.entrySet()
+				.stream()
 				.mapToInt((entry) -> entry.getKey().getMaximumSize().height)
-				.max().getAsInt();
-		int width = components.entrySet().stream()
-				.filter( entry -> !entry.getValue().equals(FIRST_COMPONENT))
+				.max()
+				.getAsInt();
+		int width = components
+				.entrySet()
+				.stream()
+				.filter(entry -> !entry.getValue().equals(FIRST_COMPONENT))
 				.mapToInt((entry) -> entry.getKey().getMaximumSize().width)
-				.max().getAsInt();
-		
-		
+				.max()
+				.getAsInt();
+
 		return createDimensionFromValues(target, height, width);
 	}
 
@@ -195,7 +246,5 @@ public class CalcLayout implements LayoutManager2 {
 
 	public void invalidateLayout(Container target) {
 	}
-
-	
 
 }

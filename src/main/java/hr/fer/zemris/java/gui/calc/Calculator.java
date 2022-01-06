@@ -27,29 +27,47 @@ import hr.fer.zemris.java.gui.calc.impl.UnaryOperators;
 import hr.fer.zemris.java.gui.layouts.CalcLayout;
 import hr.fer.zemris.java.gui.layouts.RCPosition;
 
+/**Driver class for calculator. It uses {@link CalcModelImpl} as calculator logic.
+ * @author gorsicleo
+ *
+ */
 @SuppressWarnings("serial")
 public class Calculator extends JFrame{
+	
 	private static final Color FACEBOOK_BLUE_COLOR = new Color(59, 89, 182);
+	
 	private static final Color GRAY_COLOR = Color.GRAY;
+	
 	private static final Color DARK_GRAY_COLOR = Color.DARK_GRAY;
 
+	/**Function that extracts button text*/
 	private final ActionListener numberPressedListener = (e) -> numberPressed(((JButton) e.getSource()).getText());
 
+	/**Calculator logic implementation*/
 	private CalcModelImpl engine;
+	
+	/**Calculator display*/
 	private JLabel display;
+	
 	private boolean isInvertedState;
+	
+	/**Reference to all buttons that change text when inverted*/
 	private Set<JButton> inverseButtons = new HashSet<JButton>();
+	
+	/**Stack memory*/
 	private Stack<Double> memory = new Stack<Double>();
 	
 	
 	
+	/**Constructor.*/
 	public Calculator() {
 		initGUI();
 	}
 
 
 	
-
+	/**Method creates new panel and {@link CalcModelImpl}.
+	 * Then calls methods to put all buttons and other calculator components*/
 	private void initGUI() {
 		JPanel panel = new JPanel(new CalcLayout(5));
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -73,6 +91,7 @@ public class Calculator extends JFrame{
 	}
 
 
+	/**Method creates function keys and puts them to calculator*/
 	private void addFunctionButtons(JPanel panel) {
 		JButton clear = createCalculatorButton("clr", DARK_GRAY_COLOR);
 		panel.add(clear, new RCPosition(1, 7));
@@ -84,7 +103,6 @@ public class Calculator extends JFrame{
 		panel.add(push, new RCPosition(3, 7));
 
 		JButton pop = createCalculatorButton("pop", DARK_GRAY_COLOR);
-		//pop.addActionListener();
 		panel.add(pop, new RCPosition(4, 7));
 
 		JCheckBox inv = new JCheckBox("Inv");
@@ -98,7 +116,9 @@ public class Calculator extends JFrame{
 
 
 	
-
+	/**function that iterates through all buttons that change 
+	 * their names in inverted state and sets their text
+	*/
 	private void invertButton(JButton button) {
 		String[][] namePairs = {{"sin", "cos", "tan", "ctg", "x^n", "ln", "log" },
 				                {"arcsin", "arccos", "arctan", "arcctg", "x^(1/n)", "e^x", "10^x" }};
@@ -119,6 +139,7 @@ public class Calculator extends JFrame{
 
 
 
+	/**Method creates operator keys and puts them to calculator*/
 	private void addOperatorButtons(JPanel panel) {
 		JButton decimal = createCalculatorButton(".",GRAY_COLOR);
 		panel.add(decimal, new RCPosition(5, 5));
@@ -177,7 +198,7 @@ public class Calculator extends JFrame{
 
 
 	
-
+	/**Method creates display and puts it to calculator*/
 	private void addDisplay(JPanel panel) {
 		display = new JLabel(engine.getDisplay());
 		display.setPreferredSize(getPreferredSize());
@@ -190,6 +211,7 @@ public class Calculator extends JFrame{
 		panel.add(display,new RCPosition(1, 1));
 	}
 	
+	/**Method creates one button, sets button background to given color and sets listener*/
 	private JButton createCalculatorButton(String text, Color backgroundColor) {
 		JButton bt = new JButton(text);
 		bt.setBackground(backgroundColor);
@@ -199,7 +221,12 @@ public class Calculator extends JFrame{
         addListenerForCreatedButton(text, bt);
 		return bt;
 	}
+	
 
+	/**Function adds listener to given button according to button text.
+	 * @param text button text
+	 * @param bt button for adding listener
+	 */
 	private void addListenerForCreatedButton(String text, JButton bt) {
 		
 		if (Character.isDigit(text.charAt(0))) {
@@ -236,7 +263,7 @@ public class Calculator extends JFrame{
 			break;
 			
 		case "1/x":
-			bt.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.RECIPROCAL,UnaryOperators.RECIPROCAL));
+			bt.addActionListener((e) -> unaryOperatorPressed(UnaryOperators.RECIPROCAL));
 			break;
 			
 		case "+/-":
@@ -252,19 +279,19 @@ public class Calculator extends JFrame{
 			break;
 			
 		case "-":
-			bt.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.SUB,BinaryOperators.SUB));
+			bt.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.SUB));
 			break;
 			
 		case "+":
-			bt.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.SUM,BinaryOperators.SUM));
+			bt.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.SUM));
 			break;
 			
 		case "*":
-			bt.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.MUL,BinaryOperators.MUL));
+			bt.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.MUL));
 			break;
 			
 		case "/":
-			bt.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.DIV,BinaryOperators.DIV));
+			bt.addActionListener((e) -> binaryOperatorPressed(BinaryOperators.DIV));
 			break;
 			
 		case "clr":
@@ -293,7 +320,7 @@ public class Calculator extends JFrame{
 
 
 
-
+	/**Method creates number keys and puts them to calculator*/
 	private void addNumberButtons(JPanel panel) {
 		JButton bt0 = createCalculatorButton("0",FACEBOOK_BLUE_COLOR);
 		panel.add(bt0, new RCPosition(5, 3));
@@ -328,40 +355,46 @@ public class Calculator extends JFrame{
 	}
 
 	
-	
+	/**Function calls {@link CalcModelImpl} insertDigit function when number key is pressed*/
 	private void numberPressed(String text) {
 		engine.insertDigit(Integer.parseInt(text));
 		updateDisplay();
 	}
 
+	/**Refreshes display with latest display state from {@link CalcModelImpl}*/
 	private void updateDisplay() {
 		display.setText(engine.getDisplay());
 	}
 	
+	/**Function calls {@link CalcModelImpl} swapSign function when invert key is pressed*/
 	private void invertPressed() {
 		engine.swapSign();
 		updateDisplay();
 	}
 	
+	/**Function calls {@link CalcModelImpl} to insert decimal point*/
 	private void decimalPressed() {
 		engine.insertDecimalPoint();
 		updateDisplay();
 	}
 	
+	/**Function calls {@link CalcModelImpl} to clear its state after clear button has been pressed*/
 	private void clearPressed() {
 		engine.clear();
 		updateDisplay();
 	}
 	
+	/**Function calls {@link CalcModelImpl} to reset its state after reset button has been pressed*/
 	private void resetPressed() {
 		memory.clear();
 		clearPressed();
 	}
 	
+	/**Method pushes to calculator stack memory number that is currently displayed*/
 	private void pushPressed() {
 		memory.push(engine.getValue());
 	}
-	
+	/**Method pops one number form memory and sets it to calculator current value*/
 	private void popPressed() {
 		if (memory.isEmpty()) {
 			display.setText("MEMORY EMPTY");
@@ -373,6 +406,7 @@ public class Calculator extends JFrame{
 		engine.clear();
 	}
 	
+	/**Function calls {@link CalcModelImpl} to update pendingBinaryOperator. */
 	private void binaryOperatorPressed(DoubleBinaryOperator operator, DoubleBinaryOperator invertedOperator) {
 		engine.setActiveOperand(engine.getValue());
 		
@@ -383,6 +417,17 @@ public class Calculator extends JFrame{
 		updateDisplay();
 	}
 	
+	/**Overload for functions that are not impacted by inverse checkbox*/
+	private void binaryOperatorPressed(DoubleBinaryOperator operator) {
+		binaryOperatorPressed(operator, operator);
+	}
+	
+	/**Overload for functions that are not impacted by inverse checkbox*/
+	private void unaryOperatorPressed(DoubleUnaryOperator operator) {
+		unaryOperatorPressed(operator, operator);
+	}
+	
+	/**Calculates and displays result of current value in calculator after operator is applied*/
 	private void unaryOperatorPressed(DoubleUnaryOperator operator,DoubleUnaryOperator invertedOperator ) {
 		double result = (isInvertedState)? invertedOperator.applyAsDouble(engine.getValue()):operator.applyAsDouble(engine.getValue());
 		engine.setValue(result);
@@ -390,7 +435,7 @@ public class Calculator extends JFrame{
 		engine.clear();
 	}
 	
-	
+	/**Executes binary operation*/
 	private void equalsPressed() {
 		double operand1 = engine.getActiveOperand();
 		double operand2 = engine.getValue();

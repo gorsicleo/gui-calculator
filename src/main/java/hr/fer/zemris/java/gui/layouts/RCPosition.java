@@ -1,5 +1,9 @@
 package hr.fer.zemris.java.gui.layouts;
 
+/**Model for component position in {@link CalcLayout}.
+ * @author gorsicleo
+ *
+ */
 public class RCPosition {
 
 	private static final String ILLEGAL_ARGUMENT_MESSAGE = "Argument: %s cannot be recognized as format (row, column)";
@@ -9,22 +13,29 @@ public class RCPosition {
 	private int column;
 	
 
+	/**Creates new {@link RCPosition} at given <code>row</code> and <code>column</code>
+	 * @param row
+	 * @param column
+	 */
 	public RCPosition(int row, int column) {
 		this.row = row;
 		this.column = column;
 	}
 	
 
+	/**Returns row of this position*/
 	public int getRow() {
 		return row;
 	}
 
-
+	/**Returns column of this position*/
 	public int getColumn() {
 		return column;
 	}
 
-	
+	/**Creates {@link RCPosition} with row and column data parsed from input string in format of x,y
+	 * @throws IllegalArgumentException if string cannot be parsed to {@link RCPosition}
+	 * */
 	public static RCPosition parse(String text) {
 		String[] data = text.split(",");
 		
