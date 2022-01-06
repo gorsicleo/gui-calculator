@@ -38,7 +38,7 @@ public class BarChartComponent extends JComponent {
 	private Color histogramColor;
 
 	/**
-	 * Dreates new {@link BarChartComponent} object and draws histogram with given
+	 * Creates new {@link BarChartComponent} object and draws histogram with given
 	 * barChart
 	 */
 	public BarChartComponent(BarChart barChart) {
