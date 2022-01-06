@@ -1,8 +1,6 @@
 package hr.fer.zemris.java.gui.charts;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -13,18 +11,36 @@ import java.util.Random;
 
 import javax.swing.JComponent;
 
+/**
+ * Class that draws histogram along with coordinate system and short description
+ * for X and Y axis. Class must be provided with {@link BarChart} in order to
+ * draw histogram.
+ * 
+ * @author gorsicleo
+ *
+ */
+@SuppressWarnings("serial")
 public class BarChartComponent extends JComponent {
 
 	private static final int LEFT_MARGIN = 40;
 	private static final int RIGHT_MARGIN = 30;
-	private static final int BOTTOM_MARGIN = 30;
-	private static final int ARROW_HEAD_OFFSET = 18;
+	private static final int BOTTOM_MARGIN = 60;
+	private static final int TOP_MARGIN = 18;
+	private static final int ARROW_MARGIN = 10;
 
 	private BarChart barChart;
+
+	/** Number of bars drawn */
 	private int count;
+
+	/** Used for creating random color for histogram fill */
 	private Random rand = new Random();
 	private Color histogramColor;
 
+	/**
+	 * Dreates new {@link BarChartComponent} object and draws histogram with given
+	 * barChart
+	 */
 	public BarChartComponent(BarChart barChart) {
 		this.barChart = barChart;
 		histogramColor = new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());
@@ -35,56 +51,87 @@ public class BarChartComponent extends JComponent {
 		draw(g2D);
 	}
 
-	public void draw(Graphics2D graphic) {
+	/**
+	 * Calls methods to draw histogram along with coordinate system.
+	 * 
+	 * @param graphic
+	 */
+	private void draw(Graphics2D graphic) {
 		List<XYValue> points = barChart.getPoints();
 
-		int yStart = getBounds().height - 2 * BOTTOM_MARGIN;
-		int xEnd = getBounds().width - RIGHT_MARGIN + ARROW_HEAD_OFFSET;
-		int step = getBounds().height / ((barChart.getMaxY() - barChart.getMinY()) / barChart.getStepY());
-		
-		
+		int yStart = getBounds().height - BOTTOM_MARGIN;
+		int xEnd = getBounds().width - RIGHT_MARGIN + TOP_MARGIN;
+		int step = (getBounds().height - BOTTOM_MARGIN - TOP_MARGIN - ARROW_MARGIN)
+				/ (barChart.getMaxY() / barChart.getStepY());
 
 		drawCoordinates2(graphic, yStart, xEnd, step);
 
 		drawHistogram(graphic, points);
-		
+
 		drawDescriptionX(graphic);
 		drawDescriptionY(graphic);
-
 	}
 
+	/**
+	 * Draws rotated string of barChart description for Y axis.
+	 * 
+	 * @param graphic
+	 */
 	private void drawDescriptionY(Graphics2D graphic) {
 		String text = barChart.getDescriptionY();
-		
+
 		AffineTransform at = new AffineTransform();
-		at.rotate(-1*Math.PI / 2);
-		 
+		at.rotate(-1 * Math.PI / 2);
+
 		graphic.setTransform(at);
 		graphic.setFont(new Font("Arial", Font.BOLD, 16));
-		graphic.drawString(text, -1*(getBounds().height+2*(BOTTOM_MARGIN+ARROW_HEAD_OFFSET))/2, 20);
-		
+		graphic.drawString(text, -1 * (getBounds().height - (BOTTOM_MARGIN + TOP_MARGIN)), 20);
+
 		at.rotate(Math.PI / 2);
 		graphic.setTransform(at);
 	}
 
+	/**
+	 * Draws string of barChart description for X axis on bottom of component.
+	 * 
+	 * @param graphic
+	 */
 	private void drawDescriptionX(Graphics2D graphic) {
 		String text = barChart.getDescriptionX();
-		
-		graphic.drawString(text, getBounds().width/2, getBounds().height-BOTTOM_MARGIN);
-		
+		int textLength = text.length();
+
+		graphic.drawString(text, getBounds().width / 2 - textLength * 2, getBounds().height - BOTTOM_MARGIN / 2);
+
 	}
 
+	/**
+	 * Draws coordinate arrows for X and Y axis. Also draws horizontal lines for
+	 * coordinate grid together with Y axis numbers.
+	 * 
+	 * @param graphic
+	 * @param yStart
+	 * @param xEnd
+	 * @param step
+	 */
 	private void drawCoordinates2(Graphics2D graphic, int yStart, int xEnd, int step) {
 		drawCoordinateArrows(graphic, yStart, xEnd);
 		drawHorizontalNumbersAndLines(graphic, xEnd, step);
 	}
 
+	/**
+	 * Draws horizontal lines for coordinate grid together with Y axis numbers.
+	 * 
+	 * @param graphic
+	 * @param xEnd
+	 * @param step
+	 */
 	private void drawHorizontalNumbersAndLines(Graphics2D graphic, int xEnd, int step) {
-		for (int i = barChart.getMinY(); i < barChart.getMaxY(); i = i + barChart.getStepY()) {
 
-			int yForStep = getBounds().height - (i / barChart.getStepY()) * step - 2 * BOTTOM_MARGIN;
-			if (yForStep - 30 < 0)
-				continue;
+		int height = getBounds().height - BOTTOM_MARGIN;
+		int count = 0;
+		for (int i = barChart.getMinY(); i <= barChart.getMaxY(); i = i + barChart.getStepY()) {
+
+			int yForStep = height - (count * step);
 
 			graphic.drawLine(LEFT_MARGIN, yForStep, xEnd, yForStep);
 
@@ -93,17 +140,26 @@ public class BarChartComponent extends JComponent {
 			} else {
 				graphic.drawString(String.valueOf(i), LEFT_MARGIN - 10, yForStep);
 			}
-
+			
+			count++;
 		}
 	}
 
+	/**
+	 * Draws two arrow lines one representing X axis, second representing Y axis.
+	 * 
+	 * @param graphic
+	 * @param yStart
+	 * @param xEnd
+	 */
 	private void drawCoordinateArrows(Graphics2D graphic, int yStart, int xEnd) {
-		drawArrowLine(graphic, LEFT_MARGIN, yStart, LEFT_MARGIN, ARROW_HEAD_OFFSET, 10, 10);
+		drawArrowLine(graphic, LEFT_MARGIN, yStart, LEFT_MARGIN, TOP_MARGIN, 10, 10);
 		drawArrowLine(graphic, LEFT_MARGIN, yStart, xEnd, yStart, 10, 10);
 	}
 
 	/**
-	 * Draw an arrow line between two points.
+	 * Draws arrow line, where start of arrow is represented with (x1,y1) and arrow
+	 * tip is at (x2,y2)
 	 * 
 	 * @param g  the graphics component.
 	 * @param x1 x-position of first point.
@@ -134,17 +190,24 @@ public class BarChartComponent extends JComponent {
 		g.fillPolygon(xpoints, ypoints, 3);
 	}
 
+	/**
+	 * Method draws rectangles (bars) for every point of data extracted from
+	 * barChart.
+	 * 
+	 * @param graphic
+	 * @param points
+	 */
 	private void drawHistogram(Graphics2D graphic, List<XYValue> points) {
-		int width = getBounds().width - LEFT_MARGIN;
-		int height = getBounds().height - BOTTOM_MARGIN;
 		count = 0;
+		int width = getBounds().width - LEFT_MARGIN - RIGHT_MARGIN;
+		int height = getBounds().height - BOTTOM_MARGIN - TOP_MARGIN - ARROW_MARGIN;
 
 		points.forEach((point) -> {
-			int barWidth = (width - RIGHT_MARGIN) / points.size();
-			int barHeight = Math.round((height + ARROW_HEAD_OFFSET) * point.getY() / barChart.getMaxY());
+			int barWidth = width / points.size();
+			int barHeight = Math.round(height * point.getY() / (barChart.getMaxY()));
 
 			Rectangle bar = new Rectangle(LEFT_MARGIN + (point.getX() - 1) * barWidth,
-					height - barHeight - BOTTOM_MARGIN, barWidth, barHeight);
+					height - barHeight + TOP_MARGIN + ARROW_MARGIN, barWidth, barHeight);
 			graphic.setColor(histogramColor);
 			graphic.fill(bar);
 			graphic.setColor(Color.BLACK);
@@ -154,11 +217,20 @@ public class BarChartComponent extends JComponent {
 		});
 	}
 
+	/**
+	 * Method draws vertical lines for coordinate grid and corresponding numbers
+	 * below X axis representing bar count.
+	 * 
+	 * @param graphic
+	 * @param point
+	 * @param barWidth
+	 */
 	private void drawCoordinates1(Graphics2D graphic, XYValue point, int barWidth) {
 		int xStart = LEFT_MARGIN + (point.getX() - 1) * barWidth;
-		graphic.drawLine(barWidth + xStart, getBounds().height - 2 * BOTTOM_MARGIN, barWidth + xStart,
-				ARROW_HEAD_OFFSET);
-		graphic.drawString(String.valueOf(count), xStart + (barWidth / 2), getBounds().height - BOTTOM_MARGIN*2+ARROW_HEAD_OFFSET);
+		graphic.drawLine(barWidth + xStart, getBounds().height - BOTTOM_MARGIN - TOP_MARGIN, barWidth + xStart,
+				TOP_MARGIN);
+		graphic.drawString(String.valueOf(count + 1), xStart + (barWidth / 2),
+				getBounds().height - BOTTOM_MARGIN - TOP_MARGIN / 4);
 	}
 
 }
